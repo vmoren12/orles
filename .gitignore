@@ -1,0 +1,14 @@
+# Sistema operatiu
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Materials de treball que no formen part del lloc
+*.pdf
+fotos/
+proves/

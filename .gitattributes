@@ -1,0 +1,4 @@
+# Normalitza els finals de línia al repositori
+* text=auto eol=lf
+
+*.png binary

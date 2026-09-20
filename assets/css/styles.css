@@ -1,0 +1,374 @@
+/* Orles — full de estils
+   Paleta monocroma, sense ombres pesades ni degradats. */
+
+:root {
+  --bg: #f4f4f2;
+  --surface: #ffffff;
+  --ink: #141414;
+  --ink-soft: #5c5c58;
+  --ink-faint: #8d8d87;
+  --line: #e0e0dc;
+  --line-strong: #c9c9c3;
+  --focus: #141414;
+  --radius: 4px;
+  --panel-w: 310px;
+  --topbar-h: 56px;
+  --font-ui: "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2 { margin: 0; font-weight: 600; }
+
+/* ---------- Barra superior ---------- */
+
+.topbar {
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.brand { display: flex; align-items: center; gap: 10px; }
+
+.brand h1 {
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.brand-mark {
+  width: 16px;
+  height: 16px;
+  background:
+    linear-gradient(var(--ink), var(--ink)) 0 0 / 6px 9px no-repeat,
+    linear-gradient(var(--ink), var(--ink)) 10px 0 / 6px 9px no-repeat,
+    linear-gradient(var(--ink), var(--ink)) 0 11px / 6px 5px no-repeat,
+    linear-gradient(var(--ink), var(--ink)) 10px 11px / 6px 5px no-repeat;
+}
+
+.topbar-actions { display: flex; align-items: center; gap: 8px; }
+
+.status {
+  color: var(--ink-faint);
+  font-size: 12px;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Estructura ---------- */
+
+.layout {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--panel-w) minmax(0, 1fr);
+  height: calc(100% - var(--topbar-h));
+}
+
+.panel {
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.group {
+  padding: 18px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.group:last-child { border-bottom: 0; }
+
+.group h2 {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 14px;
+}
+
+/* ---------- Controls ---------- */
+
+.field {
+  display: block;
+  margin-bottom: 12px;
+  border: 0;
+  padding: 0;
+}
+
+.field > span,
+.check > span {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-bottom: 5px;
+}
+
+.field output {
+  float: right;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+input[type="text"],
+select {
+  width: 100%;
+  height: 32px;
+  padding: 0 9px;
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  appearance: none;
+}
+
+select {
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink-soft) 50%),
+                    linear-gradient(135deg, var(--ink-soft) 50%, transparent 50%);
+  background-position: calc(100% - 15px) 14px, calc(100% - 10px) 14px;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 28px;
+}
+
+input[type="text"]:focus-visible,
+select:focus-visible,
+button:focus-visible,
+input[type="range"]:focus-visible,
+input[type="color"]:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+input[type="color"] {
+  width: 100%;
+  height: 32px;
+  padding: 3px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+input[type="range"] {
+  width: 100%;
+  height: 18px;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 1px;
+  background: var(--line-strong);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+input[type="range"]::-moz-range-track { height: 1px; background: var(--line-strong); }
+input[type="range"]::-moz-range-thumb {
+  width: 13px; height: 13px; border: 0; border-radius: 50%; background: var(--ink);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 9px;
+  cursor: pointer;
+}
+
+.check > span { margin: 0; color: var(--ink); }
+
+.check input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--ink);
+  margin: 0;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.segmented input { position: absolute; opacity: 0; pointer-events: none; }
+
+.segmented label {
+  padding: 7px 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  user-select: none;
+}
+
+.segmented label + input + label { border-left: 1px solid var(--line-strong); }
+.segmented input:checked + label { background: var(--ink); color: #fff; }
+.segmented input:focus-visible + label { outline: 2px solid var(--focus); outline-offset: -2px; }
+
+.btn {
+  height: 32px;
+  padding: 0 12px;
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn:hover { background: #f0f0ed; }
+.btn:active { background: #e6e6e2; }
+
+.btn-primary { background: var(--ink); border-color: var(--ink); color: #fff; }
+.btn-primary:hover { background: #2c2c2c; }
+.btn-primary:active { background: #000; }
+
+.btn-quiet { border-color: transparent; color: var(--ink-soft); }
+.btn-quiet:hover { border-color: var(--line-strong); }
+
+.btn-block { width: 100%; }
+
+.btn-icon { width: 32px; padding: 0; font-size: 15px; line-height: 1; }
+
+.row { margin-bottom: 8px; }
+.row:last-child { margin-bottom: 0; }
+.row-split { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
+.hint {
+  margin: 0 0 12px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink-faint);
+}
+
+.counter { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+/* ---------- Escenari ---------- */
+
+.stage {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background:
+    repeating-conic-gradient(#efefec 0% 25%, var(--bg) 0% 50%) 0 0 / 18px 18px;
+}
+
+.stage-inner { line-height: 0; }
+
+#sheet {
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  touch-action: none;
+  cursor: default;
+}
+
+#sheet.is-grabbable { cursor: grab; }
+#sheet.is-grabbing { cursor: grabbing; }
+
+.dropzone {
+  position: absolute;
+  inset: 12px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--ink);
+  background: rgba(244, 244, 242, 0.88);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+
+/* ---------- Fitxa de la fotografia ---------- */
+
+.inspector {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  width: 248px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.09);
+}
+
+.inspector-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.inspector-head strong { font-size: 12px; font-weight: 600; }
+
+.inspector .hint { margin-bottom: 10px; }
+
+.inspector-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.inspector-actions + .inspector-actions { margin-top: 6px; }
+.inspector-actions-split { display: flex; align-items: center; justify-content: space-between; }
+.order { display: flex; gap: 6px; }
+
+/* ---------- Superposició ---------- */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(244, 244, 242, 0.8);
+  z-index: 10;
+}
+
+.overlay-box {
+  padding: 14px 20px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+}
+
+[hidden] { display: none !important; }
+
+/* ---------- Adaptació a pantalles estretes ---------- */
+
+@media (max-width: 860px) {
+  body { overflow: auto; }
+  .layout { grid-template-columns: 1fr; height: auto; }
+  .panel { border-right: 0; border-bottom: 1px solid var(--line); overflow: visible; }
+  .stage { min-height: 70vh; padding: 16px; }
+  .inspector { position: fixed; right: 12px; bottom: 12px; left: 12px; width: auto; }
+}
