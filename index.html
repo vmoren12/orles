@@ -85,17 +85,14 @@
         </div>
       </div>
       <div class="field">
-        <span>Estampat</span>
-        <div class="patterns" id="bgPatterns" role="radiogroup" aria-label="Estampat del fons">
-          <button type="button" class="pattern" data-pattern="none" role="radio" title="Llis"><canvas></canvas><span>Llis</span></button>
-          <button type="button" class="pattern" data-pattern="dots" role="radio" title="Punts"><canvas></canvas><span>Punts</span></button>
-          <button type="button" class="pattern" data-pattern="grid" role="radio" title="Quadrícula"><canvas></canvas><span>Quadrícula</span></button>
-          <button type="button" class="pattern" data-pattern="diagonal" role="radio" title="Ratlles"><canvas></canvas><span>Ratlles</span></button>
-          <button type="button" class="pattern" data-pattern="diamonds" role="radio" title="Rombes"><canvas></canvas><span>Rombes</span></button>
-          <button type="button" class="pattern" data-pattern="waves" role="radio" title="Ones"><canvas></canvas><span>Ones</span></button>
-          <button type="button" class="pattern" data-pattern="stars" role="radio" title="Estrelles"><canvas></canvas><span>Estrelles</span></button>
-          <button type="button" class="pattern" data-pattern="confetti" role="radio" title="Confeti"><canvas></canvas><span>Confeti</span></button>
-          <button type="button" class="pattern" data-pattern="frame" role="radio" title="Marc clàssic"><canvas></canvas><span>Marc</span></button>
+        <span id="patternPickerLabel">Estampat</span>
+        <div class="picker" id="patternPicker">
+          <button type="button" class="picker-toggle" aria-haspopup="true" aria-expanded="false" aria-labelledby="patternPickerLabel patternPickerValue">
+            <canvas aria-hidden="true"></canvas>
+            <span class="picker-value" id="patternPickerValue">Llis</span>
+            <span class="picker-chevron" aria-hidden="true"></span>
+          </button>
+          <div class="picker-menu" role="radiogroup" aria-label="Estampat del fons" hidden></div>
         </div>
       </div>
       <div id="patternOptions">
@@ -110,6 +107,31 @@
         <label class="field">
           <span>Mida de l'estampat <output id="bgPatternScaleOut">100 %</output></span>
           <input type="range" id="bgPatternScale" min="0.5" max="2.5" step="0.05" value="1">
+        </label>
+      </div>
+      <div class="field">
+        <span id="borderPickerLabel">Senefa</span>
+        <div class="picker" id="borderPicker">
+          <button type="button" class="picker-toggle" aria-haspopup="true" aria-expanded="false" aria-labelledby="borderPickerLabel borderPickerValue">
+            <canvas aria-hidden="true"></canvas>
+            <span class="picker-value" id="borderPickerValue">Sense senefa</span>
+            <span class="picker-chevron" aria-hidden="true"></span>
+          </button>
+          <div class="picker-menu" role="radiogroup" aria-label="Senefa de la vora" hidden></div>
+        </div>
+      </div>
+      <div id="borderOptions">
+        <label class="field">
+          <span>Color de la senefa</span>
+          <input type="color" id="bgBorderColor" value="#141414">
+        </label>
+        <label class="field">
+          <span>Intensitat de la senefa <output id="bgBorderOpacityOut">55 %</output></span>
+          <input type="range" id="bgBorderOpacity" min="0.05" max="1" step="0.01" value="0.55">
+        </label>
+        <label class="field">
+          <span>Mida de la senefa <output id="bgBorderScaleOut">100 %</output></span>
+          <input type="range" id="bgBorderScale" min="0.5" max="2" step="0.05" value="1">
         </label>
       </div>
       <div class="row">

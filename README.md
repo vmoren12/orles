@@ -24,10 +24,17 @@ fotografies no surten mai de l'ordinador.
   nansa ⇄ de la cantonada fins a una altra foto; les dues es canvien de lloc.
 - **Composició**: proporció 3:4, 4:5, 1:1 o 4:3, cantonades rectes, arrodonides o
   ovalades, filet opcional i última fila incompleta centrada.
-- **Fons**: colors suggerits o qualsevol altre, estampats suaus (punts,
-  quadrícula, ratlles, rombes, ones, estrelles, confeti o marc clàssic) amb color,
-  intensitat i mida ajustables, i també una imatge de fons pròpia (omplint la
-  pàgina, sencera o en mosaic) amb la intensitat que vulguis.
+- **Fons**: colors suggerits o qualsevol altre i, en dos desplegables amb
+  miniatures que es poden combinar:
+  - *Estampats* bàsics (punts, quadrícula, ratlles, rombes, ones, estrelles,
+    confeti), de natura (fulles, branquetes, ginkgo, floretes, falgueres) i
+    minimalistes (creus, ratlla fina, escates, art déco, terratzo).
+  - *Senefes* per a la vora: filet, marc clàssic, greca, llorer, garlanda,
+    perles, festó o només cantonades.
+
+  Tots dos tenen color, intensitat i mida ajustables. També es pot carregar una
+  imatge de fons pròpia (omplint la pàgina, sencera o en mosaic) amb la
+  intensitat que vulguis.
 - **Textos**: títol, subtítol i peu de pàgina, amb tipografia serif o sans-serif,
   mides i colors ajustables.
 - **Segell del centre** opcional, a l'esquerra, a la dreta o sobre el títol.

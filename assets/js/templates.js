@@ -22,6 +22,31 @@ window.Orla.templates = (function () {
     '4:3': 4 / 3
   };
 
+  /** Estampats de fons disponibles, agrupats per al desplegable: [valor, nom]. */
+  var PATTERNS = [
+    { title: 'Bàsics', items: [
+      ['none', 'Llis'], ['dots', 'Punts'], ['grid', 'Quadrícula'], ['diagonal', 'Ratlles'],
+      ['diamonds', 'Rombes'], ['waves', 'Ones'], ['stars', 'Estrelles'], ['confetti', 'Confeti']
+    ] },
+    { title: 'Natura', items: [
+      ['leaves', 'Fulles'], ['sprigs', 'Branquetes'], ['ginkgo', 'Ginkgo'],
+      ['flowers', 'Floretes'], ['ferns', 'Falgueres']
+    ] },
+    { title: 'Minimalistes', items: [
+      ['crosses', 'Creus'], ['pinstripe', 'Ratlla fina'], ['scales', 'Escates'],
+      ['deco', 'Art déco'], ['terrazzo', 'Terratzo']
+    ] }
+  ];
+
+  /** Senefes (decoració de la vora de la pàgina). */
+  var BORDERS = [
+    { title: 'Senefes', items: [
+      ['none', 'Sense senefa'], ['line', 'Filet'], ['frame', 'Marc clàssic'], ['greek', 'Greca'],
+      ['laurel', 'Llorer'], ['vine', 'Garlanda'], ['beads', 'Perles'], ['scallop', 'Festó'],
+      ['corners', 'Cantonades']
+    ] }
+  ];
+
   /**
    * Retorna les dimensions de la pàgina segons la mida i l'orientació.
    * @returns {{w:number, h:number}}
@@ -57,6 +82,8 @@ window.Orla.templates = (function () {
   return {
     PAGE_SIZES: PAGE_SIZES,
     ASPECTS: ASPECTS,
+    PATTERNS: PATTERNS,
+    BORDERS: BORDERS,
     pageDimensions: pageDimensions,
     bestColumns: bestColumns
   };

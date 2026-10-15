@@ -19,6 +19,10 @@
     bgPatternColor: '#141414',
     bgPatternOpacity: 0.12,
     bgPatternScale: 1,
+    bgBorder: 'none',
+    bgBorderColor: '#141414',
+    bgBorderOpacity: 0.55,
+    bgBorderScale: 1,
     bgImageFit: 'cover',
     bgImageOpacity: 0.35,
     matrix: '4x5',
@@ -107,6 +111,11 @@
       Object.keys(defaults).forEach(function (key) {
         if (data[key] !== undefined && data[key] !== null) state[key] = data[key];
       });
+      // El marc clàssic era un estampat; ara és una senefa.
+      if (state.bgPattern === 'frame') {
+        state.bgPattern = 'none';
+        if (data.bgBorder === undefined) state.bgBorder = 'frame';
+      }
     } catch (err) { /* configuració il·legible: s'usen els valors per defecte */ }
   }
 
@@ -281,6 +290,9 @@
     bindValue('bgPatternColor', 'bgPatternColor'),
     bindValue('bgPatternOpacity', 'bgPatternOpacity', num, pct),
     bindValue('bgPatternScale', 'bgPatternScale', num, pct),
+    bindValue('bgBorderColor', 'bgBorderColor'),
+    bindValue('bgBorderOpacity', 'bgBorderOpacity', num, pct),
+    bindValue('bgBorderScale', 'bgBorderScale', num, pct),
     bindValue('bgImageFit', 'bgImageFit'),
     bindValue('bgImageOpacity', 'bgImageOpacity', num, pct),
     bindValue('matrix', 'matrix'),
@@ -314,7 +326,6 @@
 
   var swatches = Array.prototype.slice.call(document.querySelectorAll('#bgSwatches .swatch[data-color]'));
   var customSwatch = document.querySelector('#bgSwatches .swatch-custom');
-  var patternButtons = Array.prototype.slice.call(document.querySelectorAll('#bgPatterns .pattern'));
 
   swatches.forEach(function (btn) { btn.style.setProperty('--swatch', btn.dataset.color); });
 
@@ -334,24 +345,130 @@
     if (ratio < 3) setStatus('Amb aquest fons, el text es llegirà malament: canvia\'n el color a «Textos».');
   }
 
-  function drawPatternThumbs() {
+  /** Pinta la miniatura d'un estampat o d'una senefa amb els colors actuals. */
+  function paintThumb(thumb, kind, value) {
     var dpr = window.devicePixelRatio || 1;
-    patternButtons.forEach(function (btn) {
-      var thumb = btn.querySelector('canvas');
-      var cssW = thumb.clientWidth || 80;
-      var cssH = thumb.clientHeight || 34;
-      thumb.width = Math.round(cssW * dpr);
-      thumb.height = Math.round(cssH * dpr);
+    var cssW = thumb.clientWidth;
+    var cssH = thumb.clientHeight;
+    if (!cssW || !cssH) return; // el desplegable és tancat: ja es pintarà en obrir-lo
+    thumb.width = Math.round(cssW * dpr);
+    thumb.height = Math.round(cssH * dpr);
+    var tctx = thumb.getContext('2d');
+    tctx.fillStyle = state.bgColor;
+    tctx.fillRect(0, 0, thumb.width, thumb.height);
+    if (kind === 'pattern') {
       var areaW = 30; // mil·límetres de pàgina representats a la miniatura
       var s = thumb.width / areaW;
-      var tctx = thumb.getContext('2d');
-      tctx.fillStyle = state.bgColor;
-      tctx.fillRect(0, 0, thumb.width, thumb.height);
       tctx.globalAlpha = Math.max(state.bgPatternOpacity, 0.35);
-      renderer.drawPattern(tctx, btn.dataset.pattern, areaW, thumb.height / s, s, state.bgPatternColor, 0.7, 2.5);
-      tctx.globalAlpha = 1;
-    });
+      renderer.drawPattern(tctx, value, areaW, thumb.height / s, s, state.bgPatternColor, 0.7);
+    } else {
+      var bw = 26;
+      var bs = thumb.width / bw;
+      tctx.globalAlpha = Math.max(state.bgBorderOpacity, 0.6);
+      renderer.drawBorder(tctx, value, bw, thumb.height / bs, bs, state.bgBorderColor, 0.5, 1.5);
+    }
+    tctx.globalAlpha = 1;
   }
+
+  /**
+   * Desplegable amb miniatures agrupades per categories.
+   * @param {string} id contenidor .picker
+   * @param {Array} groups catàleg ({ title, items: [[valor, nom]] })
+   * @param {string} key clau de l'estat que modifica
+   * @param {string} kind 'pattern' o 'border'
+   */
+  function createPicker(id, groups, key, kind) {
+    var root = $(id);
+    var toggle = root.querySelector('.picker-toggle');
+    var menu = root.querySelector('.picker-menu');
+    var names = {};
+    var buttons = [];
+
+    groups.forEach(function (group) {
+      var title = document.createElement('div');
+      title.className = 'picker-group';
+      title.textContent = group.title;
+      var grid = document.createElement('div');
+      grid.className = 'picker-grid';
+      group.items.forEach(function (item) {
+        names[item[0]] = item[1];
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'pattern';
+        btn.title = item[1];
+        btn.dataset.value = item[0];
+        btn.setAttribute('role', 'radio');
+        btn.appendChild(document.createElement('canvas'));
+        btn.appendChild(document.createElement('span')).textContent = item[1];
+        btn.addEventListener('click', function () {
+          state[key] = item[0];
+          saveSettings();
+          close();
+          toggle.focus();
+          syncBackgroundUi();
+          requestRender();
+        });
+        grid.appendChild(btn);
+        buttons.push(btn);
+      });
+      if (groups.length > 1) menu.appendChild(title);
+      menu.appendChild(grid);
+    });
+
+    function paint() {
+      paintThumb(toggle.querySelector('canvas'), kind, state[key]);
+      if (menu.hidden) return;
+      buttons.forEach(function (btn) { paintThumb(btn.querySelector('canvas'), kind, btn.dataset.value); });
+    }
+
+    function open() {
+      pickers.forEach(function (p) { if (p !== api) p.close(); });
+      menu.hidden = false;
+      toggle.setAttribute('aria-expanded', 'true');
+      paint();
+      var current = menu.querySelector('[aria-checked="true"]');
+      if (current) {
+        current.focus();
+        current.scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    function close() {
+      menu.hidden = true;
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+
+    toggle.addEventListener('click', function () {
+      if (menu.hidden) open(); else close();
+    });
+
+    var api = {
+      root: root,
+      isOpen: function () { return !menu.hidden; },
+      close: close,
+      focus: function () { toggle.focus(); },
+      paint: paint,
+      sync: function () {
+        if (!names[state[key]]) state[key] = 'none';
+        buttons.forEach(function (btn) {
+          btn.setAttribute('aria-checked', btn.dataset.value === state[key] ? 'true' : 'false');
+        });
+        root.querySelector('.picker-value').textContent = names[state[key]];
+        paint();
+      }
+    };
+    return api;
+  }
+
+  var pickers = [
+    createPicker('patternPicker', Orla.templates.PATTERNS, 'bgPattern', 'pattern'),
+    createPicker('borderPicker', Orla.templates.BORDERS, 'bgBorder', 'border')
+  ];
+
+  // Tanca els desplegables en fer clic fora.
+  document.addEventListener('pointerdown', function (e) {
+    pickers.forEach(function (p) { if (p.isOpen() && !p.root.contains(e.target)) p.close(); });
+  });
 
   function syncBackgroundUi() {
     var color = String(state.bgColor).toLowerCase();
@@ -364,13 +481,11 @@
     customSwatch.classList.toggle('is-custom', !matched);
     customSwatch.style.background = matched ? '' : color;
 
-    patternButtons.forEach(function (btn) {
-      btn.setAttribute('aria-checked', btn.dataset.pattern === state.bgPattern ? 'true' : 'false');
-    });
+    pickers.forEach(function (p) { p.sync(); });
     $('patternOptions').hidden = state.bgPattern === 'none';
+    $('borderOptions').hidden = state.bgBorder === 'none';
     $('bgImageOptions').hidden = !state.bgImage;
     $('addBgImage').textContent = state.bgImage ? 'Canvia la imatge de fons' : 'Carrega una imatge de fons';
-    drawPatternThumbs();
   }
 
   swatches.forEach(function (btn) {
@@ -386,16 +501,11 @@
 
   $('bgColor').addEventListener('input', syncBackgroundUi);
   $('bgColor').addEventListener('change', warnContrast);
-  $('bgPatternColor').addEventListener('input', drawPatternThumbs);
-  $('bgPatternOpacity').addEventListener('input', drawPatternThumbs);
-
-  patternButtons.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      state.bgPattern = btn.dataset.pattern;
-      saveSettings();
-      syncBackgroundUi();
-      requestRender();
-    });
+  ['bgPatternColor', 'bgPatternOpacity'].forEach(function (id) {
+    $(id).addEventListener('input', pickers[0].paint);
+  });
+  ['bgBorderColor', 'bgBorderOpacity'].forEach(function (id) {
+    $(id).addEventListener('input', pickers[1].paint);
   });
 
   function clearBgImage() {
@@ -696,6 +806,14 @@
   });
 
   document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      var openPicker = pickers.filter(function (p) { return p.isOpen(); })[0];
+      if (openPicker) {
+        openPicker.close();
+        openPicker.focus();
+        return;
+      }
+    }
     var tag = document.activeElement ? document.activeElement.tagName : '';
     if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') {
       if (e.key === 'Escape') document.activeElement.blur();
