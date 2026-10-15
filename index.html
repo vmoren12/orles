@@ -62,10 +62,77 @@
         <span>Marge <output id="marginOut">15 mm</output></span>
         <input type="range" id="margin" min="5" max="40" step="1" value="15">
       </label>
-      <label class="field">
-        <span>Color de fons</span>
-        <input type="color" id="bgColor" value="#ffffff">
-      </label>
+    </section>
+
+    <section class="group">
+      <h2>Fons</h2>
+      <div class="field">
+        <span>Color</span>
+        <div class="swatches" id="bgSwatches" role="group" aria-label="Colors de fons suggerits">
+          <button type="button" class="swatch" data-color="#ffffff" title="Blanc" aria-label="Blanc"></button>
+          <button type="button" class="swatch" data-color="#faf6ee" title="Crema" aria-label="Crema"></button>
+          <button type="button" class="swatch" data-color="#f2ece1" title="Sorra" aria-label="Sorra"></button>
+          <button type="button" class="swatch" data-color="#eef0f2" title="Gris perla" aria-label="Gris perla"></button>
+          <button type="button" class="swatch" data-color="#e7eff7" title="Blau cel" aria-label="Blau cel"></button>
+          <button type="button" class="swatch" data-color="#e9f1ea" title="Verd sàlvia" aria-label="Verd sàlvia"></button>
+          <button type="button" class="swatch" data-color="#f8eaea" title="Rosa pàl·lid" aria-label="Rosa pàl·lid"></button>
+          <button type="button" class="swatch" data-color="#efe9f5" title="Lavanda" aria-label="Lavanda"></button>
+          <button type="button" class="swatch" data-color="#1f2a44" title="Blau marí" aria-label="Blau marí"></button>
+          <button type="button" class="swatch" data-color="#1b1b1b" title="Negre" aria-label="Negre"></button>
+          <label class="swatch swatch-custom" title="Un altre color">
+            <input type="color" id="bgColor" value="#ffffff" aria-label="Tria un altre color de fons">
+          </label>
+        </div>
+      </div>
+      <div class="field">
+        <span>Estampat</span>
+        <div class="patterns" id="bgPatterns" role="radiogroup" aria-label="Estampat del fons">
+          <button type="button" class="pattern" data-pattern="none" role="radio" title="Llis"><canvas></canvas><span>Llis</span></button>
+          <button type="button" class="pattern" data-pattern="dots" role="radio" title="Punts"><canvas></canvas><span>Punts</span></button>
+          <button type="button" class="pattern" data-pattern="grid" role="radio" title="Quadrícula"><canvas></canvas><span>Quadrícula</span></button>
+          <button type="button" class="pattern" data-pattern="diagonal" role="radio" title="Ratlles"><canvas></canvas><span>Ratlles</span></button>
+          <button type="button" class="pattern" data-pattern="diamonds" role="radio" title="Rombes"><canvas></canvas><span>Rombes</span></button>
+          <button type="button" class="pattern" data-pattern="waves" role="radio" title="Ones"><canvas></canvas><span>Ones</span></button>
+          <button type="button" class="pattern" data-pattern="stars" role="radio" title="Estrelles"><canvas></canvas><span>Estrelles</span></button>
+          <button type="button" class="pattern" data-pattern="confetti" role="radio" title="Confeti"><canvas></canvas><span>Confeti</span></button>
+          <button type="button" class="pattern" data-pattern="frame" role="radio" title="Marc clàssic"><canvas></canvas><span>Marc</span></button>
+        </div>
+      </div>
+      <div id="patternOptions">
+        <label class="field">
+          <span>Color de l'estampat</span>
+          <input type="color" id="bgPatternColor" value="#141414">
+        </label>
+        <label class="field">
+          <span>Intensitat <output id="bgPatternOpacityOut">12 %</output></span>
+          <input type="range" id="bgPatternOpacity" min="0.03" max="1" step="0.01" value="0.12">
+        </label>
+        <label class="field">
+          <span>Mida de l'estampat <output id="bgPatternScaleOut">100 %</output></span>
+          <input type="range" id="bgPatternScale" min="0.5" max="2.5" step="0.05" value="1">
+        </label>
+      </div>
+      <div class="row">
+        <button type="button" id="addBgImage" class="btn btn-block">Carrega una imatge de fons</button>
+      </div>
+      <div id="bgImageOptions" hidden>
+        <label class="field">
+          <span>Ajust de la imatge</span>
+          <select id="bgImageFit">
+            <option value="cover" selected>Omple tota la pàgina</option>
+            <option value="contain">Sencera, centrada</option>
+            <option value="tile">Mosaic</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Intensitat de la imatge <output id="bgImageOpacityOut">35 %</output></span>
+          <input type="range" id="bgImageOpacity" min="0.05" max="1" step="0.01" value="0.35">
+        </label>
+        <div class="row">
+          <button type="button" id="clearBgImage" class="btn btn-quiet btn-block">Treu la imatge de fons</button>
+        </div>
+      </div>
+      <p class="hint">Una intensitat baixa fa que la imatge quedi suau i no destorbi les fotografies.</p>
     </section>
 
     <section class="group">
@@ -190,6 +257,11 @@
   <section class="stage" id="stage">
     <div class="stage-inner">
       <canvas id="sheet" aria-label="Previsualització de l'orla"></canvas>
+      <button type="button" class="swap-handle" id="swapHandle" hidden tabindex="-1"
+              title="Arrossega per intercanviar aquesta foto amb una altra"
+              aria-label="Arrossega per intercanviar la posició de la foto">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4 3 8l4 4M3 8h13M17 12l4 4-4 4M21 16H8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
     </div>
     <div class="dropzone" id="dropzone" hidden><span>Deixa anar les fotografies</span></div>
   </section>
@@ -207,7 +279,7 @@
       <span>Escala <output id="zoomOut">100 %</output></span>
       <input type="range" id="zoom" min="1" max="3" step="0.01" value="1">
     </label>
-    <p class="hint">Arrossega la foto sobre la pàgina per enquadrar-la. Les fletxes del teclat l'ajusten amb precisió.</p>
+    <p class="hint">Arrossega la foto sobre la pàgina per enquadrar-la. Les fletxes del teclat l'ajusten amb precisió. Per canviar-la de lloc, arrossega la nansa ⇄ de la cantonada fins a una altra foto.</p>
     <div class="inspector-actions">
       <button type="button" id="recenter" class="btn">Centra</button>
       <button type="button" id="replace" class="btn">Substitueix</button>
@@ -228,6 +300,7 @@
 <input type="file" id="filePhotos" accept="image/*" multiple hidden>
 <input type="file" id="fileSeal" accept="image/*" hidden>
 <input type="file" id="fileReplace" accept="image/*" hidden>
+<input type="file" id="fileBgImage" accept="image/*" hidden>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 <script src="assets/js/templates.js" defer></script>

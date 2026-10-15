@@ -86,7 +86,18 @@ window.Orla.layout = (function (templates) {
     var fam = state.font;
     var ops = [];
 
-    ops.push({ t: 'rect', x: 0, y: 0, w: page.w, h: page.h, fill: state.bgColor });
+    ops.push({
+      t: 'background', x: 0, y: 0, w: page.w, h: page.h,
+      color: state.bgColor,
+      pattern: state.bgPattern,
+      patternColor: state.bgPatternColor,
+      patternOpacity: state.bgPatternOpacity,
+      patternScale: state.bgPatternScale,
+      inset: m * 0.4,
+      image: state.bgImage || null,
+      imageFit: state.bgImageFit,
+      imageOpacity: state.bgImageOpacity
+    });
 
     /* --- Capçalera --- */
 

@@ -277,6 +277,101 @@ input[type="range"]::-moz-range-thumb {
 
 .counter { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 
+/* ---------- Fons: mostres de color i estampats ---------- */
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(28px, 1fr));
+  gap: 6px;
+}
+
+.swatch {
+  position: relative;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--swatch, #fff);
+  cursor: pointer;
+}
+
+.swatch:hover { transform: scale(1.08); }
+
+.swatch[aria-pressed="true"] {
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink);
+}
+
+.swatch-custom {
+  overflow: hidden;
+  background: conic-gradient(#f3b4b4, #f6e3a8, #b9e2c0, #b3d4f0, #d6c2ef, #f3b4b4);
+}
+
+.swatch-custom::after {
+  content: "+";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  color: var(--ink);
+  pointer-events: none;
+}
+
+.swatch-custom input[type="color"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.swatch-custom:focus-within { outline: 2px solid var(--focus); outline-offset: 1px; }
+
+.swatch-custom.is-custom { box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink); }
+.swatch-custom.is-custom::after { content: none; }
+
+.patterns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.pattern {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  padding: 4px 4px 5px;
+  font: inherit;
+  font-size: 11px;
+  color: var(--ink-soft);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.pattern canvas {
+  display: block;
+  width: 100%;
+  height: 34px;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+.pattern:hover { border-color: var(--ink-faint); }
+
+.pattern[aria-checked="true"] {
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+  color: var(--ink);
+}
+
+.pattern:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+
 /* ---------- Escenari ---------- */
 
 .stage {
@@ -289,7 +384,7 @@ input[type="range"]::-moz-range-thumb {
     repeating-conic-gradient(#efefec 0% 25%, var(--bg) 0% 50%) 0 0 / 18px 18px;
 }
 
-.stage-inner { line-height: 0; }
+.stage-inner { position: relative; line-height: 0; }
 
 #sheet {
   border: 1px solid var(--line-strong);
@@ -300,6 +395,40 @@ input[type="range"]::-moz-range-thumb {
 
 #sheet.is-grabbable { cursor: grab; }
 #sheet.is-grabbing { cursor: grabbing; }
+
+/* Nansa per intercanviar fotos: apareix a la cantonada de la foto sota el punter. */
+.swap-handle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--handle, 26px);
+  height: var(--handle, 26px);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: #fff;
+  background: rgba(20, 20, 20, 0.82);
+  border: 1.5px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  cursor: move;
+  touch-action: none;
+  transition: transform 0.12s ease, background 0.12s ease;
+}
+
+.swap-handle svg { width: 62%; height: 62%; }
+
+.swap-handle:hover,
+.swap-handle:focus-visible {
+  background: #141414;
+  transform: scale(1.12);
+  outline: none;
+}
+
+.is-swapping,
+.is-swapping * { cursor: grabbing !important; }
+
+.is-swapping .swap-handle { opacity: 0; }
 
 .dropzone {
   position: absolute;

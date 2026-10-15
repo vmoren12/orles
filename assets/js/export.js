@@ -8,6 +8,7 @@ window.Orla.exporter = (function (layout, renderer) {
   'use strict';
 
   var PT_PER_MM = 72 / 25.4;
+  var BG_MAX_DPI = 200;
 
   function hexToRgb(hex) {
     var h = String(hex || '#000').replace('#', '');
@@ -49,7 +50,11 @@ window.Orla.exporter = (function (layout, renderer) {
     setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
   }
 
-  /** Rasteritza una operació d'imatge (amb la seva forma) a un canvas propi. */
+  /**
+   * Rasteritza una operació d'imatge (amb la seva forma) a un canvas propi.
+   * `background` és el color de fons o bé { canvas, pxPerMm } quan el fons
+   * és decorat: llavors se'n copia el tros que queda sota la foto.
+   */
   function rasterize(op, pxPerMm, background) {
     var canvas = document.createElement('canvas');
     canvas.width = Math.max(1, Math.round(op.w * pxPerMm));
@@ -57,8 +62,13 @@ window.Orla.exporter = (function (layout, renderer) {
     var ctx = canvas.getContext('2d');
     ctx.imageSmoothingQuality = 'high';
     if (!op.alpha) {
-      ctx.fillStyle = background;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      if (background && background.canvas) {
+        var b = background.pxPerMm;
+        ctx.drawImage(background.canvas, op.x * b, op.y * b, op.w * b, op.h * b, 0, 0, canvas.width, canvas.height);
+      } else {
+        ctx.fillStyle = background;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
     }
     var local = {
       x: 0, y: 0, w: op.w, h: op.h,
@@ -98,10 +108,26 @@ window.Orla.exporter = (function (layout, renderer) {
       creator: 'Orles'
     });
 
+    var background = state.bgColor;
+
     for (var i = 0; i < composed.ops.length; i++) {
       var op = composed.ops[i];
 
-      if (op.t === 'rect') {
+      if (op.t === 'background') {
+        if (renderer.isDecorated(op)) {
+          // Els estampats i les imatges de fons no necessiten la resolució de les fotos.
+          var bgPxPerMm = Math.min(pxPerMm, BG_MAX_DPI / 25.4);
+          var bgCanvas = renderer.backgroundCanvas(op, bgPxPerMm);
+          background = { canvas: bgCanvas, pxPerMm: bgPxPerMm };
+          doc.addImage(bgCanvas.toDataURL('image/jpeg', 0.9), 'JPEG', op.x, op.y, op.w, op.h, undefined, 'FAST');
+          await yieldToUi();
+        } else {
+          var bg = hexToRgb(op.color);
+          doc.setFillColor(bg[0], bg[1], bg[2]);
+          doc.rect(op.x, op.y, op.w, op.h, 'F');
+        }
+
+      } else if (op.t === 'rect') {
         var f = hexToRgb(op.fill);
         doc.setFillColor(f[0], f[1], f[2]);
         doc.rect(op.x, op.y, op.w, op.h, 'F');
@@ -127,7 +153,7 @@ window.Orla.exporter = (function (layout, renderer) {
         }
 
       } else if (op.t === 'image') {
-        var canvas = rasterize(op, pxPerMm, state.bgColor);
+        var canvas = rasterize(op, pxPerMm, background);
         if (op.alpha) {
           doc.addImage(canvas.toDataURL('image/png'), 'PNG', op.x, op.y, op.w, op.h, undefined, 'FAST');
         } else {

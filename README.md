@@ -20,14 +20,21 @@ fotografies no surten mai de l'ordinador.
 - **Enquadrament còmode**: arrossega una foto per moure-la dins del seu marc,
   fes girar la roda del ratolí per ampliar-la i afina-ho amb les fletxes del teclat.
   El botó *Centra* la retorna a l'enquadrament inicial.
+- **Intercanvi de fotos**: passa el ratolí per sobre d'una foto i arrossega la
+  nansa ⇄ de la cantonada fins a una altra foto; les dues es canvien de lloc.
 - **Composició**: proporció 3:4, 4:5, 1:1 o 4:3, cantonades rectes, arrodonides o
   ovalades, filet opcional i última fila incompleta centrada.
+- **Fons**: colors suggerits o qualsevol altre, estampats suaus (punts,
+  quadrícula, ratlles, rombes, ones, estrelles, confeti o marc clàssic) amb color,
+  intensitat i mida ajustables, i també una imatge de fons pròpia (omplint la
+  pàgina, sencera o en mosaic) amb la intensitat que vulguis.
 - **Textos**: títol, subtítol i peu de pàgina, amb tipografia serif o sans-serif,
   mides i colors ajustables.
 - **Segell del centre** opcional, a l'esquerra, a la dreta o sobre el títol.
 - **Exportació**: PDF a 150 o 300 ppp, i també PNG. Al PDF els textos són
-  vectorials i només les fotografies es rasteritzen.
-- La configuració es recorda al navegador entre sessions (les fotografies, no).
+  vectorials i només es rasteritzen les fotografies i, si n'hi ha, el fons decorat.
+- La configuració es recorda al navegador entre sessions (les fotografies i la
+  imatge de fons, no).
 
 ## Com s'utilitza
 
@@ -45,6 +52,7 @@ fotografies no surten mai de l'ordinador.
 | --- | --- |
 | Seleccionar una fotografia | clic |
 | Moure la imatge dins del marc | arrossegar |
+| Intercanviar dues fotos | arrossegar la nansa ⇄ de la cantonada (`Esc` cancel·la) |
 | Ampliar o reduir | roda del ratolí |
 | Ajust fi de l'enquadrament | fletxes (amb `Maj`, passos més grans) |
 | Substituir la imatge | doble clic |

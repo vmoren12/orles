@@ -15,6 +15,12 @@
     orientation: 'portrait',
     margin: 15,
     bgColor: '#ffffff',
+    bgPattern: 'none',
+    bgPatternColor: '#141414',
+    bgPatternOpacity: 0.12,
+    bgPatternScale: 1,
+    bgImageFit: 'cover',
+    bgImageOpacity: 0.35,
     matrix: '4x5',
     aspect: '3:4',
     shape: 'rect',
@@ -38,6 +44,7 @@
   var state = Object.assign({}, defaults, {
     photos: [],
     sealImg: null,
+    bgImage: null,
     selected: -1
   });
 
@@ -47,7 +54,11 @@
   var canvas = $('sheet');
   var ctx = canvas.getContext('2d');
   var stage = $('stage');
+  var handle = $('swapHandle');
   var statusTimer = null;
+
+  var hoverIndex = -1;  // foto sota el punter (per situar-hi la nansa)
+  var swap = null;      // intercanvi en curs: { from, to, px, py }
 
   /* ---------- Utilitats ---------- */
 
@@ -121,13 +132,17 @@
     renderer.draw(ctx, composed.ops, pxPerMm * dpr);
 
     if (state.selected >= 0 && composed.cells[state.selected]) {
-      renderer.highlight(ctx, composed.cells[state.selected], pxPerMm * dpr);
+      renderer.highlight(ctx, composed.cells[state.selected], pxPerMm * dpr, dpr);
+    }
+    if (swap) {
+      renderer.swapPreview(ctx, composed.cells, swap, state.photos, state.shape, pxPerMm * dpr, dpr);
     }
 
     view.pxPerMm = pxPerMm;
     view.cells = composed.cells;
     view.cols = composed.cols;
     view.rows = composed.rows;
+    placeHandle();
 
     var count = state.photos.length;
     $('photoCount').textContent = count === 1
@@ -263,6 +278,11 @@
     bindValue('pageSize', 'pageSize'),
     bindValue('margin', 'margin', num, mm),
     bindValue('bgColor', 'bgColor'),
+    bindValue('bgPatternColor', 'bgPatternColor'),
+    bindValue('bgPatternOpacity', 'bgPatternOpacity', num, pct),
+    bindValue('bgPatternScale', 'bgPatternScale', num, pct),
+    bindValue('bgImageFit', 'bgImageFit'),
+    bindValue('bgImageOpacity', 'bgImageOpacity', num, pct),
     bindValue('matrix', 'matrix'),
     bindValue('aspect', 'aspect'),
     bindValue('shape', 'shape'),
@@ -287,7 +307,123 @@
     controls.forEach(function (c) { c.sync(); });
     var radio = document.querySelector('input[name="orientation"][value="' + state.orientation + '"]');
     if (radio) radio.checked = true;
+    syncBackgroundUi();
   }
+
+  /* ---------- Fons ---------- */
+
+  var swatches = Array.prototype.slice.call(document.querySelectorAll('#bgSwatches .swatch[data-color]'));
+  var customSwatch = document.querySelector('#bgSwatches .swatch-custom');
+  var patternButtons = Array.prototype.slice.call(document.querySelectorAll('#bgPatterns .pattern'));
+
+  swatches.forEach(function (btn) { btn.style.setProperty('--swatch', btn.dataset.color); });
+
+  function luminance(hex) {
+    var v = parseInt(String(hex).replace('#', ''), 16);
+    return [(v >> 16) & 255, (v >> 8) & 255, v & 255].reduce(function (sum, c, i) {
+      c /= 255;
+      c = c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      return sum + c * [0.2126, 0.7152, 0.0722][i];
+    }, 0);
+  }
+
+  function warnContrast() {
+    var a = luminance(state.bgColor);
+    var b = luminance(state.textColor);
+    var ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+    if (ratio < 3) setStatus('Amb aquest fons, el text es llegirà malament: canvia\'n el color a «Textos».');
+  }
+
+  function drawPatternThumbs() {
+    var dpr = window.devicePixelRatio || 1;
+    patternButtons.forEach(function (btn) {
+      var thumb = btn.querySelector('canvas');
+      var cssW = thumb.clientWidth || 80;
+      var cssH = thumb.clientHeight || 34;
+      thumb.width = Math.round(cssW * dpr);
+      thumb.height = Math.round(cssH * dpr);
+      var areaW = 30; // mil·límetres de pàgina representats a la miniatura
+      var s = thumb.width / areaW;
+      var tctx = thumb.getContext('2d');
+      tctx.fillStyle = state.bgColor;
+      tctx.fillRect(0, 0, thumb.width, thumb.height);
+      tctx.globalAlpha = Math.max(state.bgPatternOpacity, 0.35);
+      renderer.drawPattern(tctx, btn.dataset.pattern, areaW, thumb.height / s, s, state.bgPatternColor, 0.7, 2.5);
+      tctx.globalAlpha = 1;
+    });
+  }
+
+  function syncBackgroundUi() {
+    var color = String(state.bgColor).toLowerCase();
+    var matched = false;
+    swatches.forEach(function (btn) {
+      var on = btn.dataset.color === color;
+      matched = matched || on;
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    customSwatch.classList.toggle('is-custom', !matched);
+    customSwatch.style.background = matched ? '' : color;
+
+    patternButtons.forEach(function (btn) {
+      btn.setAttribute('aria-checked', btn.dataset.pattern === state.bgPattern ? 'true' : 'false');
+    });
+    $('patternOptions').hidden = state.bgPattern === 'none';
+    $('bgImageOptions').hidden = !state.bgImage;
+    $('addBgImage').textContent = state.bgImage ? 'Canvia la imatge de fons' : 'Carrega una imatge de fons';
+    drawPatternThumbs();
+  }
+
+  swatches.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      state.bgColor = btn.dataset.color;
+      $('bgColor').value = state.bgColor;
+      saveSettings();
+      syncBackgroundUi();
+      requestRender();
+      warnContrast();
+    });
+  });
+
+  $('bgColor').addEventListener('input', syncBackgroundUi);
+  $('bgColor').addEventListener('change', warnContrast);
+  $('bgPatternColor').addEventListener('input', drawPatternThumbs);
+  $('bgPatternOpacity').addEventListener('input', drawPatternThumbs);
+
+  patternButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      state.bgPattern = btn.dataset.pattern;
+      saveSettings();
+      syncBackgroundUi();
+      requestRender();
+    });
+  });
+
+  function clearBgImage() {
+    if (state.bgImage && state.bgImage.dataUrl) URL.revokeObjectURL(state.bgImage.dataUrl);
+    state.bgImage = null;
+  }
+
+  $('addBgImage').addEventListener('click', function () { $('fileBgImage').click(); });
+  $('fileBgImage').addEventListener('change', async function (e) {
+    if (!e.target.files[0]) return;
+    try {
+      var loaded = await loadImage(e.target.files[0]);
+      clearBgImage();
+      state.bgImage = loaded.img;
+      state.bgImage.dataUrl = loaded.url;
+      syncBackgroundUi();
+      requestRender();
+    } catch (err) {
+      setStatus('No s\'ha pogut llegir la imatge de fons.');
+    }
+    e.target.value = '';
+  });
+
+  $('clearBgImage').addEventListener('click', function () {
+    clearBgImage();
+    syncBackgroundUi();
+    requestRender();
+  });
 
   Array.prototype.forEach.call(document.querySelectorAll('input[name="orientation"]'), function (radio) {
     radio.addEventListener('change', function () {
@@ -417,7 +553,13 @@
   canvas.addEventListener('pointermove', function (e) {
     if (!drag) {
       var over = cellAt(e.clientX, e.clientY);
-      canvas.classList.toggle('is-grabbable', !!over && over.index < state.photos.length);
+      var onPhoto = !!over && over.index < state.photos.length;
+      canvas.classList.toggle('is-grabbable', onPhoto);
+      var index = onPhoto ? over.index : -1;
+      if (index !== hoverIndex) {
+        hoverIndex = index;
+        placeHandle();
+      }
       return;
     }
     var photo = state.photos[state.selected];
@@ -449,6 +591,91 @@
   canvas.addEventListener('pointerup', endDrag);
   canvas.addEventListener('pointercancel', endDrag);
 
+  canvas.addEventListener('pointerleave', function (e) {
+    if (drag || e.relatedTarget === handle) return;
+    hoverIndex = -1;
+    placeHandle();
+  });
+
+  /* ---------- Intercanvi de fotos amb la nansa de la cantonada ---------- */
+
+  /** Situa la nansa a la cantonada de la foto sota el punter o, si no n'hi ha, de la seleccionada. */
+  function placeHandle() {
+    var index = swap ? swap.from : (hoverIndex >= 0 ? hoverIndex : state.selected);
+    var cell = view.cells[index];
+    if (!cell || index >= state.photos.length || state.photos.length < 2) {
+      handle.hidden = true;
+      return;
+    }
+    var s = view.pxPerMm;
+    var size = clamp(Math.round(cell.w * s * 0.28), 20, 28);
+    var inset = clamp(cell.w * s * 0.05, 2, 6);
+    handle.style.setProperty('--handle', size + 'px');
+    handle.style.left = (canvas.offsetLeft + canvas.clientLeft + cell.x * s + inset) + 'px';
+    handle.style.top = (canvas.offsetTop + canvas.clientTop + cell.y * s + inset) + 'px';
+    handle.dataset.index = index;
+    handle.hidden = false;
+  }
+
+  function updateSwap(clientX, clientY) {
+    var rect = canvas.getBoundingClientRect();
+    swap.px = (clientX - rect.left) / view.pxPerMm;
+    swap.py = (clientY - rect.top) / view.pxPerMm;
+    var over = cellAt(clientX, clientY);
+    swap.to = over && over.index < state.photos.length ? over.index : -1;
+    requestRender();
+  }
+
+  function endSwap(commit) {
+    if (!swap) return;
+    var from = swap.from;
+    var to = swap.to;
+    swap = null;
+    document.body.classList.remove('is-swapping');
+    if (commit && to >= 0 && to !== from) {
+      var moved = state.photos[from];
+      state.photos[from] = state.photos[to];
+      state.photos[to] = moved;
+      hoverIndex = to;
+      select(to);
+      setStatus('S\'han intercanviat les fotografies ' + (from + 1) + ' i ' + (to + 1) + '.');
+    } else {
+      requestRender();
+    }
+  }
+
+  handle.addEventListener('pointerdown', function (e) {
+    var from = Number(handle.dataset.index);
+    if (!state.photos[from] || e.button > 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    handle.setPointerCapture(e.pointerId);
+    if (state.selected !== from) select(from);
+    swap = { from: from, to: -1, px: 0, py: 0 };
+    document.body.classList.add('is-swapping');
+    updateSwap(e.clientX, e.clientY);
+  });
+
+  handle.addEventListener('pointermove', function (e) {
+    if (swap) updateSwap(e.clientX, e.clientY);
+  });
+
+  handle.addEventListener('pointerup', function () { endSwap(true); });
+  handle.addEventListener('pointercancel', function () { endSwap(false); });
+  handle.addEventListener('lostpointercapture', function () { endSwap(false); });
+
+  handle.addEventListener('pointerleave', function (e) {
+    if (swap || e.relatedTarget === canvas) return;
+    hoverIndex = -1;
+    placeHandle();
+  });
+
+  handle.addEventListener('wheel', function (e) {
+    // La roda sobre la nansa també amplia la foto, com sobre la resta de la casella.
+    canvas.dispatchEvent(new WheelEvent('wheel', e));
+    e.preventDefault();
+  }, { passive: false });
+
   canvas.addEventListener('wheel', function (e) {
     var cell = cellAt(e.clientX, e.clientY);
     if (!cell || cell.index >= state.photos.length) return;
@@ -472,6 +699,10 @@
     var tag = document.activeElement ? document.activeElement.tagName : '';
     if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') {
       if (e.key === 'Escape') document.activeElement.blur();
+      return;
+    }
+    if (swap) {
+      if (e.key === 'Escape') endSwap(false);
       return;
     }
     var photo = state.photos[state.selected];
