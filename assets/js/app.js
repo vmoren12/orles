@@ -103,19 +103,25 @@
     } catch (err) { /* espai no disponible: no és crític */ }
   }
 
+  /* Aplica una configuració desada; els valors de tipus incorrecte s'ignoren. */
+  function applySettings(data) {
+    Object.keys(defaults).forEach(function (key) {
+      if (data[key] !== undefined && data[key] !== null && typeof data[key] === typeof defaults[key]) {
+        state[key] = data[key];
+      }
+    });
+    // El marc clàssic era un estampat; ara és una senefa.
+    if (state.bgPattern === 'frame') {
+      state.bgPattern = 'none';
+      if (data.bgBorder === undefined) state.bgBorder = 'frame';
+    }
+  }
+
   function loadSettings() {
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
-      var data = JSON.parse(raw);
-      Object.keys(defaults).forEach(function (key) {
-        if (data[key] !== undefined && data[key] !== null) state[key] = data[key];
-      });
-      // El marc clàssic era un estampat; ara és una senefa.
-      if (state.bgPattern === 'frame') {
-        state.bgPattern = 'none';
-        if (data.bgBorder === undefined) state.bgBorder = 'frame';
-      }
+      applySettings(JSON.parse(raw));
     } catch (err) { /* configuració il·legible: s'usen els valors per defecte */ }
   }
 
@@ -585,6 +591,69 @@
     syncControls();
     requestRender();
     setStatus('Configuració restablerta.');
+  });
+
+  /* ---------- Plantilles ---------- */
+
+  var TEMPLATE_FORMAT = 'orles-plantilla';
+  var TEMPLATE_VERSION = 1;
+
+  function imageToDataUrl(img) {
+    var c = document.createElement('canvas');
+    c.width = img.naturalWidth;
+    c.height = img.naturalHeight;
+    c.getContext('2d').drawImage(img, 0, 0);
+    return c.toDataURL('image/png');
+  }
+
+  function imageFromDataUrl(src) {
+    return new Promise(function (resolve, reject) {
+      if (typeof src !== 'string' || src.indexOf('data:image/') !== 0) { reject(new Error('imatge')); return; }
+      var img = new Image();
+      img.onload = function () { resolve(img); };
+      img.onerror = function () { reject(new Error('imatge')); };
+      img.src = src;
+    });
+  }
+
+  $('saveTemplate').addEventListener('click', function () {
+    var data = { format: TEMPLATE_FORMAT, version: TEMPLATE_VERSION, settings: {} };
+    Object.keys(defaults).forEach(function (key) { data.settings[key] = state[key]; });
+    if (state.sealImg) data.seal = imageToDataUrl(state.sealImg);
+    if (state.bgImage) data.bgImage = imageToDataUrl(state.bgImage);
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    exporter.downloadBlob(blob, exporter.slug(state.title, 'orla') + '.plantilla.json');
+    setStatus('Plantilla desada.');
+  });
+
+  $('loadTemplate').addEventListener('click', function () { $('fileTemplate').click(); });
+  $('fileTemplate').addEventListener('change', async function (e) {
+    var file = e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    var data, seal = null, bg = null;
+    try {
+      data = JSON.parse(await file.text());
+      if (!data || data.format !== TEMPLATE_FORMAT || typeof data.settings !== 'object') throw new Error('format');
+      if (data.seal) seal = await imageFromDataUrl(data.seal);
+      if (data.bgImage) bg = await imageFromDataUrl(data.bgImage);
+    } catch (err) {
+      setStatus('El fitxer no és una plantilla d\'orla vàlida.');
+      return;
+    }
+
+    // La plantilla substitueix tot el disseny; les fotografies es mantenen.
+    Object.keys(defaults).forEach(function (key) { state[key] = defaults[key]; });
+    applySettings(data.settings);
+    if (state.sealImg && state.sealImg.dataUrl) URL.revokeObjectURL(state.sealImg.dataUrl);
+    state.sealImg = seal;
+    clearBgImage();
+    state.bgImage = bg;
+
+    saveSettings();
+    syncControls();
+    requestRender();
+    setStatus('Plantilla carregada.');
   });
 
   /* ---------- Fitxa de la fotografia ---------- */

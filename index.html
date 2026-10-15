@@ -261,6 +261,15 @@
     </section>
 
     <section class="group">
+      <h2>Plantilla de l'orla</h2>
+      <div class="row row-pair">
+        <button type="button" id="saveTemplate" class="btn">Desa</button>
+        <button type="button" id="loadTemplate" class="btn">Carrega</button>
+      </div>
+      <p class="hint">Desa en un fitxer totes les opcions de l'orla, amb el segell i la imatge de fons, però sense les fotografies. Carrega'l més endavant per reutilitzar el disseny.</p>
+    </section>
+
+    <section class="group">
       <h2>Exportació</h2>
       <label class="field">
         <span>Resolució</span>
@@ -323,6 +332,7 @@
 <input type="file" id="fileSeal" accept="image/*" hidden>
 <input type="file" id="fileReplace" accept="image/*" hidden>
 <input type="file" id="fileBgImage" accept="image/*" hidden>
+<input type="file" id="fileTemplate" accept=".json,application/json" hidden>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 <script src="assets/js/templates.js" defer></script>

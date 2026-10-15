@@ -193,5 +193,5 @@ window.Orla.exporter = (function (layout, renderer) {
     });
   }
 
-  return { buildPdf: buildPdf, toPdf: toPdf, toPng: toPng, slug: slug, yieldToUi: yieldToUi };
+  return { buildPdf: buildPdf, toPdf: toPdf, toPng: toPng, slug: slug, yieldToUi: yieldToUi, downloadBlob: downloadBlob };
 })(window.Orla.layout, window.Orla.renderer);

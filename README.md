@@ -42,6 +42,9 @@ fotografies no surten mai de l'ordinador.
   vectorials i només es rasteritzen les fotografies i, si n'hi ha, el fons decorat.
 - La configuració es recorda al navegador entre sessions (les fotografies i la
   imatge de fons, no).
+- **Plantilles**: el disseny sencer (pàgina, fons, composició, textos, segell i
+  imatge de fons, però no les fotografies) es pot desar en un fitxer
+  `.plantilla.json` i carregar-lo més endavant per reutilitzar-lo en una altra orla.
 
 ## Com s'utilitza
 
